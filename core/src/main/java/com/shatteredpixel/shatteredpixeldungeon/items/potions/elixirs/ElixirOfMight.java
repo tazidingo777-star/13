@@ -51,7 +51,9 @@ public class ElixirOfMight extends Elixir {
 	@Override
 	public void apply( Hero hero ) {
 		identify();
-		
+
+		Buff.affect( hero, HTBoost.class ).reset();
+
 		Dungeon.luck++;
 		hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, "1", FloatingText.LUCK);
 		
