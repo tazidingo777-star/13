@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
+import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.PsycheChest;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -115,6 +116,8 @@ public class Blacksmith extends NPC {
 							Quest.completed = true;
 
 							Badges.truth();
+
+							Quest.unlockSmithWeaponsMsg();
 						}
 					});
 				}
@@ -204,6 +207,8 @@ public class Blacksmith extends NPC {
 
 						Quest.completed = true;
 						Statistics.questScores[2] = 3000;
+
+						Quest.unlockSmithWeaponsMsg();
 					}
 
 				} else {
@@ -228,6 +233,8 @@ public class Blacksmith extends NPC {
 
 						Quest.completed = true;
 						Statistics.questScores[2] = 3000;
+
+						Quest.unlockSmithWeaponsMsg();
 					}
 
 				}
@@ -442,6 +449,12 @@ public class Blacksmith extends NPC {
 		public static Weapon.Enchantment smithEnchant;
 		public static Armor.Glyph smithGlyph;
 
+		//unlocks blacksmith weapons in the generator, with a log message (used when quest is completed during play)
+		private static void unlockSmithWeaponsMsg(){
+			Generator.unlockSmithWeapons();
+			GLog.p( Messages.get(Blacksmith.class, "unlocked") );
+		}
+
 		public static void reset() {
 			type        = 0;
 			alternative = false;
@@ -463,6 +476,8 @@ public class Blacksmith extends NPC {
 			smithRewards = null;
 			smithEnchant = null;
 			smithGlyph = null;
+
+			Generator.lockSmithWeapons();
 		}
 		
 		private static final String NODE	= "blacksmith";
@@ -555,6 +570,13 @@ public class Blacksmith extends NPC {
 						smithEnchant = (Weapon.Enchantment) node.get(ENCHANT);
 						smithGlyph   = (Armor.Glyph) node.get(GLYPH);
 					}
+				}
+
+				//note: completed alone is used here, as the KeyToTruth secret sets it without setting given
+				if (completed){
+					Generator.unlockSmithWeapons();
+				} else {
+					Generator.lockSmithWeapons();
 				}
 
 			} else {
@@ -678,6 +700,8 @@ public class Blacksmith extends NPC {
 			if (bossBeaten) favor += 1500;
 
 			Statistics.questScores[2] = favor;
+
+			unlockSmithWeaponsMsg();
 		}
 
 		public static boolean rewardsAvailable(){

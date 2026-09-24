@@ -378,8 +378,15 @@ public class ScrollOfTransmutation extends InventoryScroll {
 	private static Scroll changeScroll( Scroll s ) {
 		if (s instanceof ExoticScroll) {
 			return Reflection.newInstance(ExoticScroll.exoToReg.get(s.getClass()));
-		} else {
+		} else if (ExoticScroll.regToExo.containsKey(s.getClass())) {
 			return Reflection.newInstance(ExoticScroll.regToExo.get(s.getClass()));
+		} else {
+			//no exotic counterpart, transmute into a random other regular scroll instead
+			Scroll n;
+			do {
+				n = (Scroll) Generator.randomUsingDefaults( Generator.Category.SCROLL );
+			} while (Challenges.isItemBlocked(n) || n.getClass() == s.getClass());
+			return n;
 		}
 	}
 

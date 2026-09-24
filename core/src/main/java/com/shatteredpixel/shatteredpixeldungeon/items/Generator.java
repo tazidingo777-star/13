@@ -144,6 +144,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfUnstable;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.blacksmith.FantasmalStabber;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.blacksmith.FiringSnapper;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.blacksmith.GleamingStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.blacksmith.RegrowingSlasher;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.blacksmith.StarlightSmasher;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BattleAxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
@@ -371,10 +376,11 @@ public class Generator {
 					ScrollOfRage.class,
 					ScrollOfRetribution.class,
 					ScrollOfTerror.class,
-					ScrollOfTransmutation.class
+					ScrollOfTransmutation.class,
+					ScrollOfPerkReroll.class
 			};
-			SCROLL.defaultProbs  = new float[]{ 0, 3, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1 };
-			SCROLL.defaultProbs2 = new float[]{ 0, 3, 2, 2, 1, 2, 1, 1, 1, 1, 1, 0 };
+			SCROLL.defaultProbs  = new float[]{ 0, 3, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1 };
+			SCROLL.defaultProbs2 = new float[]{ 0, 3, 2, 2, 1, 2, 1, 1, 1, 1, 1, 0, 1 };
 			SCROLL.probs = SCROLL.defaultProbs.clone();
 			
 			STONE.classes = new Class<?>[]{
@@ -446,10 +452,15 @@ public class Generator {
 					Scimitar.class,
 					RoundShield.class,
 					Sai.class,
-					Whip.class
+					Whip.class,
+					StarlightSmasher.class,
+					RegrowingSlasher.class,
+					FiringSnapper.class,
+					GleamingStaff.class,
+					FantasmalStabber.class
 			};
-			WEP_T3.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2 };
-			WEP_T3.probs = WEP_T1.defaultProbs.clone();
+			WEP_T3.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0 };
+			WEP_T3.probs = WEP_T3.defaultProbs.clone();
 			
 			WEP_T4.classes = new Class<?>[]{
 					Longsword.class,
@@ -647,6 +658,25 @@ public class Generator {
 			} else {
 				cat.probs = cat.defaultProbs.clone();
 			}
+		}
+	}
+
+	//blacksmith weapons are added to the T3 weapon pool, but only after the blacksmith quest is completed
+	private static final int FIRST_SMITH_WEP_INDEX = 6;
+
+	public static void unlockSmithWeapons(){
+		setSmithWeaponsEnabled(true);
+	}
+
+	public static void lockSmithWeapons(){
+		setSmithWeaponsEnabled(false);
+	}
+
+	private static void setSmithWeaponsEnabled(boolean enabled){
+		float prob = enabled ? 0.5f : 0f;
+		for (int i = FIRST_SMITH_WEP_INDEX; i < Category.WEP_T3.classes.length; i++){
+			Category.WEP_T3.defaultProbs[i] = prob;
+			Category.WEP_T3.probs[i] = prob;
 		}
 	}
 
