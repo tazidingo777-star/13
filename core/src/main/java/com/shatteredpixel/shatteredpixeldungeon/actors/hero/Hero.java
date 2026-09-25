@@ -1456,6 +1456,11 @@ if (buff(RoundShield.GuardTracker.class) != null){
 			}
 			sprite.attack( enemy.pos );
 
+			//standing ground to attack also counts as holding fast
+			if (perks.contains(Perks.Perk.HOLD_FAST)){
+				Buff.affect(this, HoldFast.class).pos = pos;
+			}
+
 			return false;
 
 		} else {

@@ -218,6 +218,10 @@ public class Longsword extends MeleeWeapon {
 			return;
 		}
 
+		int charges = Math.round(chargeUse);
+		//damage scales with charges spent: 1 charge = 1x, +2x per extra charge, capped at 20x
+		final long dmgMult = Math.min(2 * charges - 1, 20);
+
 		int maxDist = 2 + Math.round(chargeUse);
 		int dist = Math.min(aim.dist, maxDist);
 
@@ -246,16 +250,24 @@ public class Longsword extends MeleeWeapon {
 						beforeAbilityUsed(hero, enemy);
 						for (int cell: cone.cells){
 							Char ch = Actor.findChar( cell );
-							if (ch != null) {
+							if (ch != null && ch.alignment != hero.alignment) {
 								LongswordWound.hit(ch.pos, 0, 0xf2e153);
 								Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 2f, 0.65f);
 								for (int i = 0; i < 1 + chargeUse/3; i++)
 									Buff.affect(ch, HolyExpEffect.class).stacks++;
+
+								//holy slash deals damage scaling with charges spent, 60% for peripheral targets
+								long dmg = Longsword.this.damageRoll(hero) * dmgMult;
+								if (ch != enemy) dmg = Math.round(dmg*0.6f);
+								ch.damage(dmg, Longsword.this);
 							}
 						}
 
 						Invisibility.dispel();
 						hero.spendAndNext(hero.attackDelay());
+						if (enemy != null && !enemy.isAlive()){
+							onAbilityKill(hero, enemy);
+						}
 						afterAbilityUsed(hero);
 					}
 				});

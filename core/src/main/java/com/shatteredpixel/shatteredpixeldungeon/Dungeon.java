@@ -693,7 +693,21 @@ public class Dungeon {
 		//chance is floors left / scrolls left
 		return Random.Int(5 - floorThisSet) < souLeftThisSet;
 	}
-	
+
+	public static boolean perkRerollNeeded() {
+		//2 perk reroll scrolls each floor set, none with forbidden runes challenge
+		if (isChallenged(Challenges.NO_SCROLLS)){
+			return false;
+		} else {
+			int prrLeftThisSet = 2 - (LimitedDrops.PERK_REROLLS.count - (depth / 5) * 2);
+			if (prrLeftThisSet <= 0) return false;
+
+			int floorThisSet = (depth % 5);
+			//chance is floors left / scrolls left
+			return Random.Int(5 - floorThisSet) < prrLeftThisSet;
+		}
+	}
+
 	public static boolean asNeeded() {
 		//1 AS each floor set
 		int asLeftThisSet = 1 - (LimitedDrops.ARCANE_STYLI.count - (depth / 5));
