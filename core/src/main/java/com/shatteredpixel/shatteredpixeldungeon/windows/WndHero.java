@@ -49,7 +49,7 @@ import java.util.Locale;
 public class WndHero extends WndTabbed {
 	
 	private static final int WIDTH		= 120;
-	private static final int HEIGHT		= 120;
+	private static final int HEIGHT		= 164;
 	
 	private StatsTab stats;
 	private BuffsTab buffs;
@@ -91,6 +91,9 @@ public class WndHero extends WndTabbed {
 		} );
 
 		layoutTabs();
+
+		//grow the window to fit the stats tab content if needed
+		resize( WIDTH, Math.max( HEIGHT, (int)Math.ceil( stats.height() ) + 6 ) );
 
 		select( lastIdx );
 	}
@@ -197,6 +200,49 @@ public class WndHero extends WndTabbed {
 			}
 
 			pos += GAP;
+
+			//guaranteed drop progress for current floor set (spawned/total, owned)
+			int setIdx = Dungeon.depth / 5;
+			int souSpawned = Dungeon.LimitedDrops.UPGRADE_SCROLLS.count - setIdx * 3;
+			int posSpawned = Dungeon.LimitedDrops.STRENGTH_POTIONS.count - setIdx * 2;
+			int prrSpawned = Dungeon.LimitedDrops.PERK_REROLLS.count - setIdx * 2;
+
+			boolean noScrolls = Dungeon.isChallenged(Challenges.NO_SCROLLS);
+			guaranteeSlot( Messages.get(this, "guarantee_sou"),
+					noScrolls ? -1 : Math.max(0, souSpawned), 3,
+					countOwned( ScrollOfUpgrade.class ) );
+			guaranteeSlot( Messages.get(this, "guarantee_pos"),
+					Math.max(0, posSpawned), 2,
+					countOwned( PotionOfStrength.class ) );
+			guaranteeSlot( Messages.get(this, "guarantee_prr"),
+					noScrolls ? -1 : Math.max(0, prrSpawned), 2,
+					countOwned( ScrollOfPerkReroll.class ) );
+		}
+
+		//spawned of -1 means disabled by the no scrolls challenge
+		private void guaranteeSlot( String label, int spawned, int total, int owned ) {
+			String value;
+			if (spawned == -1) {
+				value = Messages.get(this, "guarantee_disabled");
+			} else {
+				value = Messages.get(this, "guarantee_val", spawned, total, owned);
+			}
+			RenderedTextBlock txt = PixelScene.renderTextBlock( label + " " + value, 7 );
+			txt.maxWidth( WIDTH );
+			txt.setPos( 0, pos );
+			add( txt );
+
+			pos += 3 + txt.height();
+		}
+
+		private int countOwned( Class<? extends Item> cls ) {
+			int total = 0;
+			for (Item item : Dungeon.hero.belongings.backpack.items) {
+				if (cls.isInstance( item )) {
+					total += item.quantity();
+				}
+			}
+			return total;
 		}
 
 		private void statSlot( String label, String value ) {

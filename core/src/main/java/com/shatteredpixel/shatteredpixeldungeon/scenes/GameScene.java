@@ -286,6 +286,10 @@ public class GameScene extends PixelScene {
 		add( emitters );
 		add( effects );
 
+		//persistent colored highlights for the stairs
+		add( new StairHighlight( Dungeon.level.entrance(), StairHighlight.UP_COLOR ) );
+		add( new StairHighlight( Dungeon.level.exit(), StairHighlight.DOWN_COLOR ) );
+
 		gases = new Group();
 		add( gases );
 
