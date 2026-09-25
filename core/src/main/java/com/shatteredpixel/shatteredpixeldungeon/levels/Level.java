@@ -236,6 +236,10 @@ public abstract class Level implements Bundlable {
 					addItemToSpawn(new ScrollOfUpgrade());
 				}
 			}
+			if (Dungeon.perkRerollNeeded()) {
+				Dungeon.LimitedDrops.PERK_REROLLS.count++;
+				addItemToSpawn( new ScrollOfPerkReroll() );
+			}
 			if (Dungeon.asNeeded()) {
 				Dungeon.LimitedDrops.ARCANE_STYLI.count++;
 				addItemToSpawn( new Stylus() );

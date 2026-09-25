@@ -118,6 +118,7 @@ public class Dungeon {
 		STRENGTH_POTIONS,
 		UPGRADE_SCROLLS,
 		ARCANE_STYLI,
+		PERK_REROLLS,
         BBAT,
 		ENCH_STONE,
 		INT_STONE,
