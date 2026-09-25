@@ -199,9 +199,25 @@ public class MagesStaff extends MeleeWeapon {
 
 		if (wand != null &&
 				attacker instanceof Hero && ((Hero)attacker).isSubclass(HeroSubClass.BATTLEMAGE)) {
-			if (wand.curCharges < wand.maxCharges) wand.partialCharge += 0.5f;
-			ScrollOfRecharging.charge((Hero)attacker);
+			Hero battlemage = (Hero) attacker;
+
+			//ExpPD: battlemage melee damage scales with hero level
+			damage += battlemage.lvl / 4;
+
+			//ExpPD: first melee strike after zapping the staff deals double damage and triggers the wand effect twice
+			StaffZapTracker echo = battlemage.buff(StaffZapTracker.class);
+			if (echo != null){
+				echo.detach();
+				damage *= 2;
+			}
+
+			if (wand.curCharges < wand.maxCharges) wand.partialCharge += 0.75f;
+			ScrollOfRecharging.charge(battlemage);
+			Buff.affect(defender, StaffKillMark.class);
 			wand.onHit(this, attacker, defender, damage);
+			if (echo != null){
+				wand.onHit(this, attacker, defender, damage);
+			}
 		}
 
 		if (empoweredStrike != null){
@@ -581,4 +597,10 @@ public class MagesStaff extends MeleeWeapon {
 			size(minSize + (left / lifespan)*(maxSize-minSize) + Random.Float(sizeJitter));
 		}
 	}
+
+	//ExpPD: battlemage - marks that a staff zap happened, consumed by the next staff melee strike
+	public static class StaffZapTracker extends Buff{};
+
+	//ExpPD: battlemage - marks an enemy hit by a staff melee strike, grants +1 charge on kill
+	public static class StaffKillMark extends Buff{};
 }

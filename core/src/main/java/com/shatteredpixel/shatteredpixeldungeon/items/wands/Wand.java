@@ -370,6 +370,11 @@ public abstract class Wand extends Item {
 				lvl = Degrade.reduceLevel(lvl);
 			}
 
+			//ExpPD: wand power scales with hero level
+			if (charger.target instanceof Hero){
+				lvl += ((Hero)charger.target).lvl / 5;
+			}
+
 //			if (charger.target.buff(ScrollEmpower.class) != null){
 //				lvl += 2;
 //			}
@@ -432,6 +437,13 @@ public abstract class Wand extends Item {
 	}
 
 	public void wandUsed() {
+		//ExpPD: battlemage - zapping the imbued staff empowers the next staff melee strike
+		if (Dungeon.hero.isSubclass(HeroSubClass.BATTLEMAGE)
+				&& Dungeon.hero.belongings.weapon instanceof MagesStaff
+				&& ((MagesStaff)Dungeon.hero.belongings.weapon).wand == this){
+			Buff.affect(Dungeon.hero, MagesStaff.StaffZapTracker.class);
+		}
+
 		if (!isIdentified()) {
 			float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );
 			availableUsesToID -= uses;
@@ -758,7 +770,7 @@ public abstract class Wand extends Item {
 	public class Charger extends Buff {
 		
 		private static final float BASE_CHARGE_DELAY = 10f;
-		private static final float SCALING_CHARGE_ADDITION = 40f;
+		private static final float SCALING_CHARGE_ADDITION = 20f;
 		private static final float NORMAL_SCALE_FACTOR = 0.875f;
 
 		private static final float CHARGE_BUFF_BONUS = 0.25f;
