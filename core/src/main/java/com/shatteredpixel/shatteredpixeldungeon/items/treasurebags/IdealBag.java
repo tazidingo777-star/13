@@ -26,10 +26,13 @@ package com.shatteredpixel.shatteredpixeldungeon.items.treasurebags;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Perks;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -91,6 +94,27 @@ public class IdealBag extends TreasureBag {
         {
             image = ItemSpriteSheet.PLUTONIUM;
             stackable = true;
+        }
+
+        //ExpPD: can be thrown to poison an enemy, duration scales with hero level
+        @Override
+        protected void onThrow( int cell ) {
+            Char enemy = Actor.findChar( cell );
+            if (enemy != null && enemy != curUser){
+                shatter( cell );
+            } else {
+                super.onThrow( cell );
+            }
+        }
+
+        public void shatter( int pos ) {
+            Char enemy = Actor.findChar( pos );
+            if (enemy != null){
+                Buff.affect( enemy, Poison.class ).set( 10f + Dungeon.hero.lvl );
+                enemy.sprite.centerEmitter().burst( Speck.factory( Speck.POISON ), 12 );
+                Sample.INSTANCE.play( Assets.Sounds.GAS );
+                //note: cast() already detaches one unit before onThrow is called
+            }
         }
 
         @Override

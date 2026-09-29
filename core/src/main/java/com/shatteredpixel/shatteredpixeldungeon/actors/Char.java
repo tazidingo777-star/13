@@ -808,6 +808,11 @@ public abstract class Char extends Actor {
 		shielded -= dmg;
 		HP -= dmg;
 
+		//ExpPD: record recent damage taken for the death log
+		if (this instanceof Hero && (dmg > 0 || shielded > 0)){
+			DeathLog.record((Hero) this, dmg, shielded, src);
+		}
+
 		if (HP > 0 && shielded > 0 && shielding() == 0){
 			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
 				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);

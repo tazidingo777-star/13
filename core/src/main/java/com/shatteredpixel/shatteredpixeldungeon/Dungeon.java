@@ -26,6 +26,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DeathLog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
@@ -284,6 +285,9 @@ public class Dungeon {
 
 		Actor.clear();
 		Actor.resetNextID();
+
+		//ExpPD: clear the death log so entries never persist between runs
+		DeathLog.clear();
 
 		//offset seed slightly to avoid output patterns
 		Random.pushGenerator( seed+1 );

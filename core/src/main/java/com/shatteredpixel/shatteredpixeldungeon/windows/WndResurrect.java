@@ -26,6 +26,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DeathLog;
 import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
@@ -41,6 +42,8 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.noosa.Game;
+
+import java.util.ArrayList;
 
 public class WndResurrect extends Window {
 	
@@ -76,6 +79,25 @@ public class WndResurrect extends Window {
 		message.setPos(0, titlebar.bottom() + GAP);
 		add( message );
 
+		//ExpPD: show recent damage taken before the death
+		float pos = message.bottom() + BTN_GAP;
+		ArrayList<String> deathLog = DeathLog.entries();
+		for (int i = 0; i < deathLog.size(); i++){
+			RenderedTextBlock line = PixelScene.renderTextBlock(deathLog.get(i), 6);
+			line.maxWidth(WIDTH - 2);
+			line.setPos(1, pos);
+			add( line );
+			if (i == deathLog.size() - 1) {
+				line.hardlight(0xFF5040); //last entry is the fatal one
+			} else {
+				line.hardlight(0x999999);
+			}
+			pos = line.bottom() + GAP;
+		}
+		if (!deathLog.isEmpty()){
+			pos += 2;
+		}
+
 		btnItem1 = new ItemButton() {
 			@Override
 			protected void onClick() {
@@ -84,7 +106,7 @@ public class WndResurrect extends Window {
 			}
 		};
 		btnItem1.item(Dungeon.hero.belongings.weapon());
-		btnItem1.setRect( (WIDTH - BTN_GAP) / 2 - BTN_SIZE, message.bottom() + BTN_GAP, BTN_SIZE, BTN_SIZE );
+		btnItem1.setRect( (WIDTH - BTN_GAP) / 2 - BTN_SIZE, pos + BTN_GAP, BTN_SIZE, BTN_SIZE );
 		add( btnItem1 );
 
 		btnItem2 = new ItemButton() {

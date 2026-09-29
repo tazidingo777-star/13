@@ -223,8 +223,11 @@ public class WndHeroInfo extends WndTabbed {
 				info[i].maxWidth((int)width - 20);
 				info[i].setPos(20, pos);
 
-				icons[i].x = (20-icons[i].width())/2;
-				icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				//guard: desc may have more paragraphs than icons
+				if (i < icons.length) {
+					icons[i].x = (20-icons[i].width())/2;
+					icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				}
 
 				pos = info[i].bottom() + 4*MARGIN;
 			}
@@ -268,7 +271,8 @@ public class WndHeroInfo extends WndTabbed {
 							new TalentIcon(Talent.SCHOLARS_INTUITION),
 							new TalentIcon(Talent.SHIELD_BATTERY),
 							new TalentIcon(Talent.ARCANE_VISION),
-							new TalentIcon(Talent.INSCRIBED_POWER)};
+							new TalentIcon(Talent.INSCRIBED_POWER),
+							new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE)};
 					break;
 				case ROGUE:
 					icons = new Image[]{ new TalentIcon(Talent.SILENT_STEPS),
@@ -320,8 +324,11 @@ public class WndHeroInfo extends WndTabbed {
 				info[i].maxWidth((int)width - 20);
 				info[i].setPos(20, pos);
 
-				icons[i].x = (20-icons[i].width())/2;
-				icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				//guard: desc may have more paragraphs than icons
+				if (i < icons.length) {
+					icons[i].x = (20-icons[i].width())/2;
+					icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				}
 
 				pos = info[i].bottom() + 4*MARGIN;
 			}
