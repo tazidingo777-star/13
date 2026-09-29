@@ -111,7 +111,7 @@ public class IdealBag extends TreasureBag {
             Char enemy = Actor.findChar( pos );
             if (enemy != null){
                 Buff.affect( enemy, Poison.class ).set( 10f + Dungeon.hero.lvl );
-                enemy.sprite.centerEmitter().burst( Speck.factory( Speck.POISON ), 12 );
+                enemy.sprite.centerEmitter().burst( Speck.factory( Speck.TOXIC ), 12 );
                 Sample.INSTANCE.play( Assets.Sounds.GAS );
                 //note: cast() already detaches one unit before onThrow is called
             }
