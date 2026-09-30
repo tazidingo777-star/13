@@ -184,15 +184,19 @@ public class SpiritBow extends Weapon {
 	
 	@Override
 	public long min(long lvl) {
-		long dmg = 2 + Dungeon.hero.lvl/4
+		//ExpPD: buffed - scales with upgrades and hero level
+		long dmg = 2 + lvl
+				+ Dungeon.hero.lvl/2
 				+ 2*RingOfSharpshooting.levelDamageBonus(Dungeon.hero)
 				+ (curseInfusionBonus ? 1 + Dungeon.hero.lvl/25 : 0);
 		return Math.max(0, dmg);
 	}
-	
+
 	@Override
 	public long max(long lvl) {
-		long dmg = 8 + (int)(Dungeon.hero.lvl/2f)
+		//ExpPD: buffed - scales with upgrades and hero level
+		long dmg = 8 + 2*lvl
+				+ Dungeon.hero.lvl
 				+ 3*RingOfSharpshooting.levelDamageBonus(Dungeon.hero)
 				+ (curseInfusionBonus ? 2 + Dungeon.hero.lvl/10 : 0);
 		return Math.max(0, dmg);
@@ -267,7 +271,9 @@ public class SpiritBow extends Weapon {
 
 	@Override
 	public long level() {
+		//ExpPD: upgrade scrolls now work on the bow, on top of the automatic growth
 		int level = Dungeon.hero == null ? 0 : Dungeon.hero.lvl/5;
+		level += super.level();
 		if (curseInfusionBonus) level += 1 + level/6;
 		return level;
 	}
@@ -277,10 +283,10 @@ public class SpiritBow extends Weapon {
 		//level isn't affected by buffs/debuffs
 		return level();
 	}
-	
+
 	@Override
 	public boolean isUpgradable() {
-		return false;
+		return true;
 	}
 	
 	public SpiritArrow knockArrow(){

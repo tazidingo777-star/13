@@ -65,9 +65,10 @@ public class ArenaShopLevel extends ShopRoom{
 
         if (itemsToSpawn == null){
             itemsToSpawn = new ArrayList<>();
-            for (int i = 0; i < 6; i++) itemsToSpawn.add(new GambleBag());
-            for (int i = 0; i < 6; i++) itemsToSpawn.add(new BiggerGambleBag());
-            for (int i = 0; i < 6; i++) itemsToSpawn.add(new QualityBag());
+            //ExpPD: reduced from 6/6/6 to 4/4/4, leaving room for the shopkeeper in the shop room
+            for (int i = 0; i < 4; i++) itemsToSpawn.add(new GambleBag());
+            for (int i = 0; i < 4; i++) itemsToSpawn.add(new BiggerGambleBag());
+            for (int i = 0; i < 4; i++) itemsToSpawn.add(new QualityBag());
         }
 
         Point itemPlacement = new Point(entrance());

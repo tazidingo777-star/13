@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RageShield;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Stamina;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.MobSpawner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfAquaticRejuvenation;
@@ -50,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTileSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.audio.Music;
 import com.watabou.utils.Bundle;
@@ -157,9 +159,10 @@ public class ArenaLevel extends Level {
 
 		{
 			itemsToSpawn = new ArrayList<>();
-			for (int i = 0; i < 6; i++) itemsToSpawn.add(new GambleBag());
-			for (int i = 0; i < 6; i++) itemsToSpawn.add(new BiggerGambleBag());
-			for (int i = 0; i < 6; i++) itemsToSpawn.add(new QualityBag());
+			//ExpPD: reduced from 6/6/6 to 4/4/4, leaving room for the shopkeeper in the shop room
+			for (int i = 0; i < 4; i++) itemsToSpawn.add(new GambleBag());
+			for (int i = 0; i < 4; i++) itemsToSpawn.add(new BiggerGambleBag());
+			for (int i = 0; i < 4; i++) itemsToSpawn.add(new QualityBag());
 
 			Point itemPlacement = new Point(cellToPoint(arenaDoor));
 			if (itemPlacement.y == ROOM_TOP-1){
@@ -242,7 +245,25 @@ public class ArenaLevel extends Level {
 			}
 		}
 
-		
+		//ExpPD: spawn a shopkeeper in the arena shop room, so loot can be sold mid-run
+		int keeperCell = pointToCell(new Point((ROOM_LEFT + ROOM_RIGHT) / 2, (ROOM_TOP + 1 + ROOM_BOTTOM) / 2));
+		int guard = 0;
+		while (guard++ < 20
+				&& (heaps.get( keeperCell ) != null
+				|| findMob( keeperCell ) != null
+				|| map[keeperCell] != Terrain.EMPTY
+				|| keeperCell == entrance)){
+			keeperCell = pointToCell(new Point(
+					Random.IntRange(ROOM_LEFT, ROOM_RIGHT),
+					Random.IntRange(ROOM_TOP + 1, ROOM_BOTTOM)));
+		}
+		if (map[keeperCell] == Terrain.EMPTY) {
+			Shopkeeper keeper = new Shopkeeper();
+			keeper.pos = keeperCell;
+			mobs.add( keeper );
+		}
+
+
 		return true;
 	}
 	
@@ -322,6 +343,9 @@ public class ArenaLevel extends Level {
 			actPriority = BUFF_PRIO; //as if it were a buff.
 		}
 
+		//ExpPD: mobs spawned since the last rest break
+		private int burstCount = 0;
+
 		@Override
 		protected boolean act() {
 			float count = 0;
@@ -344,6 +368,7 @@ public class ArenaLevel extends Level {
 					GameScene.add( mob );
 					mob.beckon( Dungeon.hero.pos );
 					Buff.affect(mob, ArenaBuff.class);
+					burstCount++;
 					if (counter != null){
 						counter.countUp(Actor.TICK);
 						int power = (int) counter.count();
@@ -365,7 +390,15 @@ public class ArenaLevel extends Level {
 					}
 				}
 			}
-			spend(Dungeon.level.respawnCooldown() / timerBasis);
+
+			if (burstCount >= 6){
+				//ExpPD: give the player a breather to collect loot and sell items
+				burstCount = 0;
+				spend( Dungeon.level.respawnCooldown() / timerBasis + 20f );
+				GLog.i( Messages.get( ArenaLevel.class, "resting" ) );
+			} else {
+				spend( Dungeon.level.respawnCooldown() / timerBasis );
+			}
 			return true;
 		}
 	}
