@@ -32,7 +32,11 @@ public class SmartTexture extends Texture {
 
 	public int width;
 	public int height;
-	
+
+	//HD upscale divisor: GL storage keeps the physical (2x) bitmap, while width/height
+	//report the logical size, so all TextureFilm/frame/layout math stays unchanged.
+	public int hdScale = 1;
+
 	public int fModeMin;
 	public int fModeMax;
 	
@@ -56,6 +60,14 @@ public class SmartTexture extends Texture {
 		this.wModeH = this.wModeV = wrapping;
 		this.premultiplied = premultiplied;
 
+	}
+
+	public void hdScale( int scale ) {
+		hdScale = scale;
+		if (bitmap != null) {
+			width = bitmap.getWidth() / scale;
+			height = bitmap.getHeight() / scale;
+		}
 	}
 
 	@Override
@@ -87,12 +99,13 @@ public class SmartTexture extends Texture {
 		super.bitmap( bitmap );
 		
 		this.bitmap = bitmap;
-		width = bitmap.getWidth();
-		height = bitmap.getHeight();
+		width = bitmap.getWidth() / hdScale;
+		height = bitmap.getHeight() / hdScale;
 	}
 	
 	public int getPixel( int x, int y ){
-		int color = bitmap.getPixel(x, y);
+		//arguments are logical coordinates; physical bitmap is hdScale times larger
+		int color = bitmap.getPixel(x * hdScale, y * hdScale);
 		// convert from libGdx RGBA to Noosa ARGB
 		return ( (color << 24) | (color >>> 8) );
 	}
