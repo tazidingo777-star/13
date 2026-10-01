@@ -49,6 +49,10 @@ public class Uniform {
 	public void value1f(float value) {
 		Gdx.gl.glUniform1f(location, value);
 	}
+
+	public void value1i(int value) {
+		Gdx.gl.glUniform1i(location, value);
+	}
 	
 	public void value2f(float v1, float v2) {
 		Gdx.gl.glUniform2f(location, v1, v2);

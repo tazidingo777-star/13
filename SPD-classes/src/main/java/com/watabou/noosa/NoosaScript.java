@@ -30,6 +30,7 @@ import com.watabou.gltextures.TextureCache;
 import com.watabou.glscripts.Script;
 import com.watabou.glwrap.Attribute;
 import com.watabou.glwrap.Quad;
+import com.watabou.glwrap.Texture;
 import com.watabou.glwrap.Uniform;
 import com.watabou.glwrap.Vertexbuffer;
 
@@ -92,8 +93,10 @@ public class NoosaScript extends Script {
 			lutTex.filter(SmartTexture.NEAREST, SmartTexture.NEAREST);
 			lutTex.wrap(SmartTexture.CLAMP, SmartTexture.CLAMP);
 		}
-		lutTex.bind(1);
-		uLUT.valueInt(1);
+		// bind LUT to texture unit 1; uLUT sampler must be set as int (texture unit index)
+		Texture.activate(1);
+		lutTex.bind();
+		uLUT.value1i(1);
 
 		if (lutStrengthDirty) {
 			// strength steps: 0=0.0, 1=0.25, 2=0.55, 3=0.85, 4=1.0
