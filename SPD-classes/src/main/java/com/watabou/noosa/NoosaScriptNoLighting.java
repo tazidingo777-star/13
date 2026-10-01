@@ -62,7 +62,6 @@ public class NoosaScriptNoLighting extends NoosaScript {
 		
 		"//\n" +
 		
-		//Octopath-style color grading fragment shader (no lighting variant)
 		"#ifdef GL_ES\n" +
 		"  precision mediump float;\n" +
 		"#endif\n" +
@@ -70,18 +69,6 @@ public class NoosaScriptNoLighting extends NoosaScript {
 		"uniform sampler2D uTex;\n" +
 		"void main() {\n" +
 		"  vec4 col = texture2D( uTex, vUV );\n" +
-		"  // Contrast boost\n" +
-		"  col.rgb = (col.rgb - 0.5) * 1.15 + 0.5;\n" +
-		"  // Saturation boost\n" +
-		"  float gray = dot(col.rgb, vec3(0.299, 0.587, 0.114));\n" +
-		"  col.rgb = mix(vec3(gray), col.rgb, 1.2);\n" +
-		"  // Shadow lift\n" +
-		"  col.rgb += vec3(0.03);\n" +
-		"  // Octopath-style radial vignette + center warm glow\n" +
-		"  vec2 uvC = vUV - 0.5;\n" +
-		"  float vig = 1.0 - dot(uvC, uvC) * 0.55;\n" +
-		"  col.rgb *= vig;\n" +
-		"  col.rgb += vec3(0.02, 0.012, -0.005) * smoothstep(0.5, 0.0, length(uvC));\n" +
 		"  gl_FragColor = col;\n" +
 		"}\n";
 }
