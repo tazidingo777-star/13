@@ -60,6 +60,7 @@ public class SPDSettings extends GameSettings {
 	public static final String KEY_GRID 	    = "visual_grid";
 	public static final String KEY_CAMERA_FOLLOW= "camera_follow";
 	public static final String KEY_SCREEN_SHAKE = "screen_shake";
+	public static final String KEY_LUT_STRENGTH = "lut_strength";
 
 	public static void fullscreen( boolean value ) {
 		put( KEY_FULLSCREEN, value );
@@ -131,6 +132,15 @@ public class SPDSettings extends GameSettings {
 
 	public static void screenShake( int value ){
 		put( KEY_SCREEN_SHAKE, value );
+	}
+
+	public static void lutStrength( int value ){
+		put( KEY_LUT_STRENGTH, value );
+		com.watabou.noosa.NoosaScript.invalidateLutStrength(value);
+	}
+
+	public static int lutStrength() {
+		return getInt( KEY_LUT_STRENGTH, 2, 0, 4 );
 	}
 
 	public static int screenShake() {

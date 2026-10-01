@@ -339,6 +339,16 @@ public class WndSettings extends WndTabbed {
 			optScreenShake.setSelectedValue(SPDSettings.screenShake());
 			add(optScreenShake);
 
+			OptionSlider optLUT = new OptionSlider(Messages.get(this, "lut_strength"),
+					Messages.get(this, "off"), Messages.get(this, "high"), 0, 4) {
+				@Override
+				protected void onChange() {
+					SPDSettings.lutStrength(getSelectedValue());
+				}
+			};
+			optLUT.setSelectedValue(SPDSettings.lutStrength());
+			add(optLUT);
+
 		}
 
 		@Override

@@ -61,14 +61,25 @@ public class NoosaScriptNoLighting extends NoosaScript {
 		"}\n" +
 		
 		"//\n" +
-		
+
 		"#ifdef GL_ES\n" +
 		"  precision mediump float;\n" +
 		"#endif\n" +
 		"varying vec2 vUV;\n" +
 		"uniform sampler2D uTex;\n" +
+		"uniform sampler2D uLUT;\n" +
+		"uniform float uLUTStrength;\n" +
 		"void main() {\n" +
 		"  vec4 col = texture2D( uTex, vUV );\n" +
+		"  if (uLUTStrength > 0.0) {\n" +
+		"    float r = floor(col.r * 15.0 + 0.5) / 15.0;\n" +
+		"    float g = floor(col.g * 15.0 + 0.5) / 15.0;\n" +
+		"    float b = floor(col.b * 15.0 + 0.5) / 15.0;\n" +
+		"    float bx = floor(b * 15.0 + 0.5);\n" +
+		"    vec2 lutUV = vec2((bx + r) / 16.0, (g + 0.5) / 16.0);\n" +
+		"    vec4 graded = texture2D( uLUT, lutUV );\n" +
+		"    col.rgb = mix( col.rgb, graded.rgb, uLUTStrength );\n" +
+		"  }\n" +
 		"  gl_FragColor = col;\n" +
 		"}\n";
 }
