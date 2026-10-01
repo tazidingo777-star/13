@@ -67,18 +67,22 @@ public class NoosaScriptNoLighting extends NoosaScript {
 		"#endif\n" +
 		"varying vec2 vUV;\n" +
 		"uniform sampler2D uTex;\n" +
-		"uniform sampler2D uLUT;\n" +
-		"uniform float uLUTStrength;\n" +
+		"uniform float uGradeStrength;\n" +
 		"void main() {\n" +
 		"  vec4 col = texture2D( uTex, vUV );\n" +
-		"  if (uLUTStrength > 0.0) {\n" +
-		"    float r = floor(col.r * 15.0 + 0.5) / 15.0;\n" +
-		"    float g = floor(col.g * 15.0 + 0.5) / 15.0;\n" +
-		"    float b = floor(col.b * 15.0 + 0.5) / 15.0;\n" +
-		"    float bx = floor(b * 15.0 + 0.5);\n" +
-		"    vec2 lutUV = vec2((bx + r) / 16.0, (g + 0.5) / 16.0);\n" +
-		"    vec4 graded = texture2D( uLUT, lutUV );\n" +
-		"    col.rgb = mix( col.rgb, graded.rgb, uLUTStrength );\n" +
+		"  if (uGradeStrength > 0.0) {\n" +
+		"    vec3 c = col.rgb;\n" +
+		"    float s = uGradeStrength;\n" +
+		"    c = (c - 0.5) * (1.0 + 0.10 * s) + 0.5;\n" +
+		"    float lum = 0.299*c.r + 0.587*c.g + 0.114*c.b;\n" +
+		"    c = lum + (c - lum) * (1.0 + 0.15 * s);\n" +
+		"    float shadow = 1.0 - clamp(lum * 2.0, 0.0, 1.0);\n" +
+		"    c.r += shadow * 0.025 * s;\n" +
+		"    c.b -= shadow * 0.015 * s;\n" +
+		"    float high = clamp((lum - 0.5) * 2.0, 0.0, 1.0);\n" +
+		"    c.r += high * 0.020 * s;\n" +
+		"    c.g += high * 0.010 * s;\n" +
+		"    col.rgb = c;\n" +
 		"  }\n" +
 		"  gl_FragColor = col;\n" +
 		"}\n";

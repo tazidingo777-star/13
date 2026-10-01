@@ -136,7 +136,7 @@ public class SPDSettings extends GameSettings {
 
 	public static void lutStrength( int value ){
 		put( KEY_LUT_STRENGTH, value );
-		com.watabou.noosa.NoosaScript.invalidateLutStrength(value);
+		com.watabou.noosa.NoosaScript.invalidateGradeStrength(value);
 	}
 
 	public static int lutStrength() {

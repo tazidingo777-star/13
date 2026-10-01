@@ -149,8 +149,8 @@ public class GameScene extends PixelScene {
 			return;
 		}
 
-		// sync LUT strength from settings so first frame uses the user's chosen strength
-		com.watabou.noosa.NoosaScript.invalidateLutStrength(SPDSettings.lutStrength());
+		// sync color grade strength from settings so first frame uses the user's chosen strength
+		com.watabou.noosa.NoosaScript.invalidateGradeStrength(SPDSettings.lutStrength());
 
 		// debug logic...
 		ScrollOfDebug debug = Dungeon.hero.belongings.getItem(ScrollOfDebug.class);

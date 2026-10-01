@@ -25,12 +25,9 @@
 package com.watabou.noosa;
 
 import com.badlogic.gdx.Gdx;
-import com.watabou.gltextures.SmartTexture;
-import com.watabou.gltextures.TextureCache;
 import com.watabou.glscripts.Script;
 import com.watabou.glwrap.Attribute;
 import com.watabou.glwrap.Quad;
-import com.watabou.glwrap.Texture;
 import com.watabou.glwrap.Uniform;
 import com.watabou.glwrap.Vertexbuffer;
 
@@ -45,18 +42,14 @@ public class NoosaScript extends Script {
 	public Uniform uTex;
 	public Uniform uColorM;
 	public Uniform uColorA;
-	public Uniform uLUT;
-	public Uniform uLUTStrength;
+	public Uniform uGradeStrength;
 	public Attribute aXY;
 	public Attribute aUV;
 
-	// 256x16 LUT cube; lazy-loaded from assets/interfaces/color_lut.png and bound to texture unit 1.
-	// Alpha of LUT entries controls strength (alpha=0 -> identity, alpha=1 -> fully graded).
-	private static SmartTexture lutTex;
-
-	// Strength 0..4 of the LUT grade. Recomputed on first use() after invalidateLutStrength().
-	private static int lutStrengthStep = 4;
-	private static boolean lutStrengthDirty = true;
+	// Color grade strength 0..4 (0=off, 4=max); applied as 0.0..1.0 float in fragment shader.
+	// Set via SPDSettings.lutStrength() -> invalidateGradeStrength(step).
+	private static int gradeStrengthStep = 2;
+	private static boolean gradeStrengthDirty = true;
 
 	private Camera lastCamera;
 
@@ -70,8 +63,7 @@ public class NoosaScript extends Script {
 		uTex	= uniform( "uTex" );
 		uColorM	= uniform( "uColorM" );
 		uColorA	= uniform( "uColorA" );
-		uLUT	= uniform( "uLUT" );
-		uLUTStrength = uniform( "uLUTStrength" );
+		uGradeStrength = uniform( "uGradeStrength" );
 		aXY		= attribute( "aXYZW" );
 		aUV		= attribute( "aUV" );
 
@@ -88,24 +80,12 @@ public class NoosaScript extends Script {
 		aXY.enable();
 		aUV.enable();
 
-		if (lutTex == null) {
-			lutTex = TextureCache.get("interfaces/color_lut.png");
-			lutTex.filter(SmartTexture.NEAREST, SmartTexture.NEAREST);
-			lutTex.wrap(SmartTexture.CLAMP, SmartTexture.CLAMP);
-		}
-		// bind LUT to unit 1, then switch back to unit 0 so main texture bind() still goes to unit 0.
-		// The LUT stays bound to unit 1 across draw calls (no one else uses unit >= 1 in this project).
-		Texture.activate(1);
-		lutTex.bind();
-		Texture.activate(0);
-		uLUT.value1i(1);
-
-		if (lutStrengthDirty) {
+		if (gradeStrengthDirty) {
 			// strength steps: 0=0.0, 1=0.25, 2=0.55, 3=0.85, 4=1.0
-			int s = Math.max(0, Math.min(4, lutStrengthStep));
+			int s = Math.max(0, Math.min(4, gradeStrengthStep));
 			float v = (s == 0) ? 0f : (s == 1) ? 0.25f : (s == 2) ? 0.55f : (s == 3) ? 0.85f : 1f;
-			uLUTStrength.value1f(v);
-			lutStrengthDirty = false;
+			uGradeStrength.value1f(v);
+			gradeStrengthDirty = false;
 		}
 
 	}
@@ -222,16 +202,10 @@ public class NoosaScript extends Script {
 		return Script.use( NoosaScript.class );
 	}
 
-	// Called by SPDSettings.lutStrength() when the user changes the LUT strength setting.
-	// Pass the strength step directly (0..4) to avoid SPD-classes depending on the core module.
-	public static void invalidateLutStrength(int step) {
-		lutStrengthStep = Math.max(0, Math.min(4, step));
-		lutStrengthDirty = true;
-	}
-
-	// Backward-compatible overload for callers without a step value (defaults to full strength).
-	public static void invalidateLutStrength() {
-		invalidateLutStrength(4);
+	// Called by SPDSettings.lutStrength() when the user changes the color grade strength.
+	public static void invalidateGradeStrength(int step) {
+		gradeStrengthStep = Math.max(0, Math.min(4, step));
+		gradeStrengthDirty = true;
 	}
 	
 	
@@ -239,6 +213,9 @@ public class NoosaScript extends Script {
 		return SHADER;
 	}
 	
+	// Color grading formula (Octopath-style warm golden hour, no texture LUT dependency):
+	//   Contrast +10%, Saturation +15%, shadow warm shift, highlight gold shift.
+	// Applied in fragment shader as a single uniform strength, 0 = identity.
 	private static final String SHADER =
 		
 		//vertex shader
@@ -259,20 +236,28 @@ public class NoosaScript extends Script {
 		"#endif\n" +
 		"varying vec2 vUV;\n" +
 		"uniform sampler2D uTex;\n" +
-		"uniform sampler2D uLUT;\n" +
 		"uniform vec4 uColorM;\n" +
 		"uniform vec4 uColorA;\n" +
-		"uniform float uLUTStrength;\n" +
+		"uniform float uGradeStrength;\n" +
 		"void main() {\n" +
 		"  vec4 col = texture2D( uTex, vUV ) * uColorM + uColorA;\n" +
-		"  if (uLUTStrength > 0.0) {\n" +
-		"    float r = floor(col.r * 15.0 + 0.5) / 15.0;\n" +
-		"    float g = floor(col.g * 15.0 + 0.5) / 15.0;\n" +
-		"    float b = floor(col.b * 15.0 + 0.5) / 15.0;\n" +
-		"    float bx = floor(b * 15.0 + 0.5);\n" +
-		"    vec2 lutUV = vec2((bx + r) / 16.0, (g + 0.5) / 16.0);\n" +
-		"    vec4 graded = texture2D( uLUT, lutUV );\n" +
-		"    col.rgb = mix( col.rgb, graded.rgb, uLUTStrength );\n" +
+		"  if (uGradeStrength > 0.0) {\n" +
+		"    vec3 c = col.rgb;\n" +
+		"    float s = uGradeStrength;\n" +
+		"    // Contrast: slightly stretch midtones\n" +
+		"    c = (c - 0.5) * (1.0 + 0.10 * s) + 0.5;\n" +
+		"    // Saturation boost relative to luminance\n" +
+		"    float lum = 0.299*c.r + 0.587*c.g + 0.114*c.b;\n" +
+		"    c = lum + (c - lum) * (1.0 + 0.15 * s);\n" +
+		"    // Warm shadows: shift darks toward warm (R+, B-)\n" +
+		"    float shadow = 1.0 - clamp(lum * 2.0, 0.0, 1.0);\n" +
+		"    c.r += shadow * 0.025 * s;\n" +
+		"    c.b -= shadow * 0.015 * s;\n" +
+		"    // Warm highlights: add gold tint to brights\n" +
+		"    float high = clamp((lum - 0.5) * 2.0, 0.0, 1.0);\n" +
+		"    c.r += high * 0.020 * s;\n" +
+		"    c.g += high * 0.010 * s;\n" +
+		"    col.rgb = c;\n" +
 		"  }\n" +
 		"  gl_FragColor = col;\n" +
 		"}\n";
