@@ -124,10 +124,13 @@ public class TextureCache {
 		} else {
 
 			SmartTexture tx = new SmartTexture( getBitmap( src ) );
-			//sprites/ sheets are stored at 2x physical resolution (Scale2x);
-			//the texture reports logical (1x) size so all frame math stays unchanged
-			if (src instanceof String && ((String)src).startsWith( "sprites/" )) {
-				tx.hdScale( 2 );
+			//sprites/ and environment/ assets are stored at 2x physical res (Scale2x);
+			//the texture reports logical (1x) size so all frame/uv math stays unchanged
+			if (src instanceof String) {
+				String s = (String)src;
+				if (s.startsWith( "sprites/" ) || s.startsWith( "environment/" )) {
+					tx.hdScale( 2 );
+				}
 			}
 			all.put( src, tx );
 			return tx;
