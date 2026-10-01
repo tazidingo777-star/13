@@ -221,6 +221,7 @@ public class WndSettings extends WndTabbed {
 		OptionSlider optVisGrid;
 		OptionSlider optFollowIntensity;
 		OptionSlider optScreenShake;
+		OptionSlider optLUT;
 
 		@Override
 		protected void createChildren() {
@@ -339,7 +340,7 @@ public class WndSettings extends WndTabbed {
 			optScreenShake.setSelectedValue(SPDSettings.screenShake());
 			add(optScreenShake);
 
-			OptionSlider optLUT = new OptionSlider(Messages.get(this, "lut_strength"),
+			optLUT = new OptionSlider(Messages.get(this, "lut_strength"),
 					Messages.get(this, "off"), Messages.get(this, "high"), 0, 4) {
 				@Override
 				protected void onChange() {
@@ -404,7 +405,12 @@ public class WndSettings extends WndTabbed {
 				optScreenShake.setRect(0, optFollowIntensity.bottom() + GAP, width, SLIDER_HEIGHT);
 			}
 
-			height = optScreenShake.bottom();
+			if (optLUT != null) {
+				optLUT.setRect(0, optScreenShake.bottom() + GAP, width, SLIDER_HEIGHT);
+				height = optLUT.bottom();
+			} else {
+				height = optScreenShake.bottom();
+			}
 		}
 
 	}
