@@ -93,9 +93,11 @@ public class NoosaScript extends Script {
 			lutTex.filter(SmartTexture.NEAREST, SmartTexture.NEAREST);
 			lutTex.wrap(SmartTexture.CLAMP, SmartTexture.CLAMP);
 		}
-		// bind LUT to texture unit 1; uLUT sampler must be set as int (texture unit index)
+		// bind LUT to unit 1, then switch back to unit 0 so main texture bind() still goes to unit 0.
+		// The LUT stays bound to unit 1 across draw calls (no one else uses unit >= 1 in this project).
 		Texture.activate(1);
 		lutTex.bind();
+		Texture.activate(0);
 		uLUT.value1i(1);
 
 		if (lutStrengthDirty) {
