@@ -244,19 +244,19 @@ public class NoosaScript extends Script {
 		"  if (uGradeStrength > 0.0) {\n" +
 		"    vec3 c = col.rgb;\n" +
 		"    float s = uGradeStrength;\n" +
-		"    // Contrast: slightly stretch midtones\n" +
-		"    c = (c - 0.5) * (1.0 + 0.10 * s) + 0.5;\n" +
+		"    // Contrast: stretch midtones\n" +
+		"    c = (c - 0.5) * (1.0 + 0.25 * s) + 0.5;\n" +
 		"    // Saturation boost relative to luminance\n" +
 		"    float lum = 0.299*c.r + 0.587*c.g + 0.114*c.b;\n" +
-		"    c = lum + (c - lum) * (1.0 + 0.15 * s);\n" +
+		"    c = lum + (c - lum) * (1.0 + 0.30 * s);\n" +
 		"    // Warm shadows: shift darks toward warm (R+, B-)\n" +
 		"    float shadow = 1.0 - clamp(lum * 2.0, 0.0, 1.0);\n" +
-		"    c.r += shadow * 0.025 * s;\n" +
-		"    c.b -= shadow * 0.015 * s;\n" +
+		"    c.r += shadow * 0.07 * s;\n" +
+		"    c.b -= shadow * 0.04 * s;\n" +
 		"    // Warm highlights: add gold tint to brights\n" +
 		"    float high = clamp((lum - 0.5) * 2.0, 0.0, 1.0);\n" +
-		"    c.r += high * 0.020 * s;\n" +
-		"    c.g += high * 0.010 * s;\n" +
+		"    c.r += high * 0.06 * s;\n" +
+		"    c.g += high * 0.03 * s;\n" +
 		"    col.rgb = c;\n" +
 		"  }\n" +
 		"  gl_FragColor = col;\n" +
